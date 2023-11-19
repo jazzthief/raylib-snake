@@ -21,28 +21,67 @@ double lastUpdateTime = 0;
 // Local functions
 static void UpdateFrame(void); // Update and draw one frame
 
+// Check if `interval` (seconds) has passed
+static bool updateTriggered(double interval)
+{
+    double curTime = GetTime();
+    if (curTime - lastUpdateTime >= interval)
+    {
+        lastUpdateTime = curTime;
+        return true;
+    }
+    return false;
+}
+
+static bool isSnakeBody(Vector2 cell, deque<Vector2> snakeBody)
+{
+    for (unsigned int i = 0; i < snakeBody.size(); i++)
+    {
+        if (Vector2Equals(snakeBody[i], cell)) return true;
+    }
+    return false;
+}
+
 class Food
 {
 public:
     Vector2 pos;
     int lifetime;
 
-    Food()
+    // pass a pointer to snakeBody?
+    Food(deque<Vector2> snakeBody)
     {   
-        float x = GetRandomValue(0, cellCount - 1);
-        float y = GetRandomValue(0, cellCount - 1);
-        pos = {x, y};
+        pos = spawnRandom(snakeBody);
     }
 
     void draw()
     {
+        // Bad representation for collision?
         DrawCircle(pos.x * cellSize, pos.y * cellSize, cellSize / 2, darkGreen);
+    }
+
+    Vector2 generateRandomPos()
+    {
+        float x = GetRandomValue(0, cellCount - 1);
+        float y = GetRandomValue(0, cellCount - 1);
+        return Vector2{x, y};
+    }
+
+    Vector2 spawnRandom(deque<Vector2> snakeBody)
+    {
+        Vector2 foodPos = generateRandomPos();
+        while (isSnakeBody(foodPos, snakeBody))
+        {
+            foodPos = generateRandomPos();
+        }
+        return foodPos;
     }
 };
 
 class Snake
 {
 public:
+    // init at the center?
     deque<Vector2> body = {
         Vector2{6, 9},
         Vector2{5, 9},
@@ -52,7 +91,6 @@ public:
 
     Snake()  // init 3-cell snake in the center
     {   
-        //int center = cellCount / 2;
         deque<Vector2> body = {
             Vector2{6, 9},
             Vector2{5, 9},
@@ -85,7 +123,7 @@ class Game
 {
 public:
     Snake snake = Snake();
-    Food food = Food();
+    Food food = Food(snake.body);
 
     void draw()
     {
@@ -96,20 +134,17 @@ public:
     void update()
     {
         snake.move();
+        checkCollisionFood();
+    }
+
+    void checkCollisionFood()
+    {
+        if (Vector2Equals(snake.body[0], food.pos))
+        {
+            food.pos = food.spawnRandom(snake.body);
+        }
     }
 };
-
-// Check if `interval` (seconds) has passed
-static bool updateTriggered(double interval)
-{
-    double curTime = GetTime();
-    if (curTime - lastUpdateTime >= interval)
-    {
-        lastUpdateTime = curTime;
-        return true;
-    }
-    return false;
-}
 
 int main()
 {
