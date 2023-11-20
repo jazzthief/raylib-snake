@@ -95,15 +95,6 @@ public:
     Vector2 direction = {0, -1};
     bool shouldGrow = false;
 
-    Snake()  // init 3-cell snake in the center
-    {   
-        deque<Vector2> body = {
-            Vector2{6, 9},
-            Vector2{5, 9},
-            Vector2{4, 9}
-        };
-    }
-
     void draw()
     {
         for(int i = 0; i < body.size(); i++)
