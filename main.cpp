@@ -32,7 +32,7 @@ static bool updateTriggered(double interval)
     return false;
 }
 
-static bool isSnakeBody(Vector2 cell, deque<Vector2> snakeBody)
+static bool isSnakeBody(Vector2 cell, deque<Vector2>& snakeBody)
 {
     for (unsigned int i = 0; i < snakeBody.size(); i++)
     {
@@ -47,8 +47,7 @@ public:
     Vector2 pos;
     int lifetime;
 
-    // pass a pointer to snakeBody?
-    Food(deque<Vector2> snakeBody)
+    Food(deque<Vector2>& snakeBody)
     {   
         pos = spawnRandom(snakeBody);
     }
@@ -72,7 +71,7 @@ public:
         return Vector2{x, y};
     }
 
-    Vector2 spawnRandom(deque<Vector2> snakeBody)
+    Vector2 spawnRandom(deque<Vector2>& snakeBody)
     {
         Vector2 foodPos = generateRandomPos();
         while (isSnakeBody(foodPos, snakeBody))
@@ -86,7 +85,6 @@ public:
 class Snake
 {
 public:
-    // init at the center?
     deque<Vector2> body = {
         Vector2{6, 9},
         Vector2{5, 9},
@@ -97,7 +95,7 @@ public:
 
     void draw()
     {
-        for(int i = 0; i < body.size(); i++)
+        for(unsigned int i = 0; i < body.size(); i++)
         {
             Rectangle segment = {
                 borderWidth + body[i].x * cellSize,
@@ -160,7 +158,6 @@ public:
 
     void checkCollisionBody()
     {
-        // Don't copy the deque?
         deque<Vector2> bodyWithoutHead = snake.body;
         bodyWithoutHead.pop_front();
         if (isSnakeBody(snake.body[0], bodyWithoutHead)) gameOver();
@@ -197,7 +194,6 @@ int main()
         if (updateTriggered(0.2)) game.update();
 
         // Controls
-        // pointer to direction?
         if (IsKeyDown(KEY_RIGHT) && game.snake.direction.x != -1)
         {
             game.snake.direction = {1, 0};
